@@ -1,0 +1,686 @@
+{
+  "domain": "数据工程",
+  "subdirection": "数据采集、爬虫与RPA",
+  "app_name": "智能网页采集与数据抽取平台",
+  "app_slug": "web-scraper-platform",
+  "app_desc": "面向结构化网页和API的多源数据采集、字段抽取、反爬对抗与采集质量治理平台",
+  "frontend": "vue",
+  "backend": "python",
+  "port_frontend": 5196,
+  "port_backend": 8016,
+  "modules": [
+    {
+      "key": "crawl_project",
+      "name": "采集项目",
+      "entity": "采集项目",
+      "fields": [
+        "项目名称",
+        "目标站点",
+        "采集频率",
+        "并发线程数",
+        "负责人"
+      ],
+      "statuses": [
+        "草稿",
+        "运行中",
+        "已暂停",
+        "已结束"
+      ],
+      "actions": [
+        "启动采集",
+        "暂停采集",
+        "结束项目"
+      ],
+      "action_targets": [
+        "运行中",
+        "已暂停",
+        "已结束"
+      ],
+      "metrics": [
+        "项目总数",
+        "运行中项目",
+        "本月采集量"
+      ],
+      "desc": "管理网页和API数据采集项目的生命周期",
+      "page_shape": "crud-table",
+      "_page_shape_explicit": true
+    },
+    {
+      "key": "page_parser",
+      "name": "页面解析规则",
+      "entity": "解析规则",
+      "fields": [
+        "规则名称",
+        "目标元素选择器",
+        "字段映射",
+        "验证表达式",
+        "解析优先级"
+      ],
+      "statuses": [
+        "草稿",
+        "已启用",
+        "已失效"
+      ],
+      "actions": [
+        "启用规则",
+        "停用规则"
+      ],
+      "action_targets": [
+        "已启用",
+        "已失效"
+      ],
+      "metrics": [
+        "规则总数",
+        "已启用规则",
+        "今日命中"
+      ],
+      "desc": "定义HTML页面元素的CSS选择器、XPath和正则解析规则",
+      "page_shape": "crud-table",
+      "_page_shape_explicit": true
+    },
+    {
+      "key": "field_extractor",
+      "name": "字段抽取器",
+      "entity": "字段模板",
+      "fields": [
+        "模板名称",
+        "源字段路径",
+        "目标字段名",
+        "清洗函数",
+        "默认值"
+      ],
+      "statuses": [
+        "待验证",
+        "已验证",
+        "已废弃"
+      ],
+      "actions": [
+        "验证字段",
+        "废弃模板"
+      ],
+      "action_targets": [
+        "已验证",
+        "已废弃"
+      ],
+      "metrics": [
+        "模板总数",
+        "已验证模板",
+        "字段覆盖度"
+      ],
+      "desc": "定义从结构化/半结构化数据中抽取和清洗目标字段的规则",
+      "page_shape": "crud-table",
+      "_page_shape_explicit": true
+    },
+    {
+      "key": "anti_crawl",
+      "name": "反爬对抗",
+      "entity": "反爬策略",
+      "fields": [
+        "策略名称",
+        "代理池来源",
+        "请求头模板",
+        "Cookie管理",
+        "验证码识别方式"
+      ],
+      "statuses": [
+        "待生效",
+        "已生效",
+        "已过期"
+      ],
+      "actions": [
+        "启用策略",
+        "过期策略"
+      ],
+      "action_targets": [
+        "已生效",
+        "已过期"
+      ],
+      "metrics": [
+        "策略总数",
+        "已生效策略",
+        "平均成功率"
+      ],
+      "desc": "管理IP代理轮换、请求伪装、验证码处理等反爬对抗策略",
+      "page_shape": "crud-table",
+      "_page_shape_explicit": true
+    },
+    {
+      "key": "data_dedupe",
+      "name": "采集去重中心",
+      "entity": "去重规则",
+      "fields": [
+        "规则名称",
+        "去重维度",
+        "去重窗口",
+        "保留策略",
+        "命中计数"
+      ],
+      "statuses": [
+        "草稿",
+        "已启用",
+        "已停用"
+      ],
+      "actions": [
+        "启用去重",
+        "停用去重"
+      ],
+      "action_targets": [
+        "已启用",
+        "已停用"
+      ],
+      "metrics": [
+        "去重规则数",
+        "已启用规则",
+        "今日去重"
+      ],
+      "desc": "按业务主键、内容指纹或时间窗口配置采集数据的去重规则",
+      "page_shape": "crud-table",
+      "_page_shape_explicit": true
+    },
+    {
+      "key": "result_audit",
+      "name": "采集结果审计",
+      "entity": "审计记录",
+      "fields": [
+        "采集批次",
+        "总条数",
+        "成功条数",
+        "字段完整度",
+        "异常类型"
+      ],
+      "statuses": [
+        "正常",
+        "数据缺失",
+        "格式异常",
+        "需要复核"
+      ],
+      "actions": [
+        "标记需要复核",
+        "批量忽略"
+      ],
+      "action_targets": [
+        "需要复核",
+        "正常"
+      ],
+      "metrics": [
+        "批次总数",
+        "正常批次",
+        "异常批次"
+      ],
+      "desc": "对比采集结果与源数据，审计字段完整性和数据质量",
+      "page_shape": "job-timeline",
+      "_page_shape_explicit": true
+    },
+    {
+      "key": "rate_limiter",
+      "name": "采集限速",
+      "entity": "限速规则",
+      "fields": [
+        "规则名称",
+        "最大QPS",
+        "并发连接数",
+        "退避策略",
+        "生效时段"
+      ],
+      "statuses": [
+        "待生效",
+        "已生效",
+        "已停用"
+      ],
+      "actions": [
+        "启用限速",
+        "停用限速"
+      ],
+      "action_targets": [
+        "已生效",
+        "已停用"
+      ],
+      "metrics": [
+        "限速规则数",
+        "已生效规则",
+        "今日限速"
+      ],
+      "desc": "按站点和采集项目维度的请求限速、并发控制和退避策略",
+      "page_shape": "crud-table",
+      "_page_shape_explicit": true
+    },
+    {
+      "key": "scheduler",
+      "name": "采集调度器",
+      "entity": "调度计划",
+      "fields": [
+        "计划名称",
+        "关联项目",
+        "Cron表达式",
+        "下次执行时间",
+        "上次执行状态"
+      ],
+      "statuses": [
+        "待执行",
+        "执行中",
+        "已完成",
+        "执行失败"
+      ],
+      "actions": [
+        "立即执行",
+        "暂停计划"
+      ],
+      "action_targets": [
+        "执行中",
+        "待执行"
+      ],
+      "metrics": [
+        "计划总数",
+        "活跃计划",
+        "今日执行"
+      ],
+      "desc": "按定时或事件驱动调度采集任务的执行计划",
+      "page_shape": "crud-table",
+      "_page_shape_explicit": true
+    },
+    {
+      "key": "rpa_workflow",
+      "name": "RPA工作流",
+      "entity": "工作流",
+      "fields": [
+        "流程名称",
+        "操作步骤序列",
+        "目标应用",
+        "等待策略",
+        "异常处理"
+      ],
+      "statuses": [
+        "草稿",
+        "已发布",
+        "运行中",
+        "已归档"
+      ],
+      "actions": [
+        "发布流程",
+        "启动运行"
+      ],
+      "action_targets": [
+        "已发布",
+        "运行中"
+      ],
+      "metrics": [
+        "流程总数",
+        "已发布流程",
+        "本月执行"
+      ],
+      "desc": "定义和编排RPA自动化操作的步骤序列和条件分支",
+      "page_shape": "crud-table",
+      "_page_shape_explicit": true
+    },
+    {
+      "key": "batch_ingest",
+      "name": "批量接入",
+      "entity": "接入任务",
+      "fields": [
+        "任务名称",
+        "数据来源",
+        "文件格式",
+        "目标表",
+        "分区策略"
+      ],
+      "statuses": [
+        "待接入",
+        "接入中",
+        "已入湖",
+        "接入失败"
+      ],
+      "actions": [
+        "启动接入",
+        "重新接入"
+      ],
+      "action_targets": [
+        "接入中",
+        "接入中"
+      ],
+      "metrics": [
+        "任务总数",
+        "已入湖任务",
+        "接入数据量"
+      ],
+      "desc": "批量接入CSV、JSON和Parquet文件到数据存储",
+      "page_shape": "crud-table",
+      "_page_shape_explicit": true
+    },
+    {
+      "key": "data_quality",
+      "name": "数据质量校验",
+      "entity": "质量规则",
+      "fields": [
+        "规则名称",
+        "校验维度",
+        "阈值",
+        "应用表",
+        "最近校验结果"
+      ],
+      "statuses": [
+        "待校验",
+        "已通过",
+        "未通过",
+        "已忽略"
+      ],
+      "actions": [
+        "执行校验",
+        "忽略规则"
+      ],
+      "action_targets": [
+        "待校验",
+        "已忽略"
+      ],
+      "metrics": [
+        "规则总数",
+        "已通过规则",
+        "未通过规则"
+      ],
+      "desc": "对采集结果执行行数、空值率、值域范围和一致性校验",
+      "page_shape": "analysis-dashboard",
+      "_page_shape_explicit": true
+    },
+    {
+      "key": "log_collector",
+      "name": "日志采集",
+      "entity": "日志采集器",
+      "fields": [
+        "采集器名称",
+        "日志路径",
+        "解析模式",
+        "输出Topic",
+        "采集速率"
+      ],
+      "statuses": [
+        "待启动",
+        "运行中",
+        "已停止",
+        "异常"
+      ],
+      "actions": [
+        "启动采集",
+        "停止采集"
+      ],
+      "action_targets": [
+        "运行中",
+        "已停止"
+      ],
+      "metrics": [
+        "采集器总数",
+        "运行中采集器",
+        "日志采集量"
+      ],
+      "desc": "采集服务器应用日志、访问日志和系统日志并结构化解析",
+      "page_shape": "crud-table",
+      "_page_shape_explicit": true
+    },
+    {
+      "key": "proxy_pool",
+      "name": "代理池管理",
+      "entity": "代理节点",
+      "fields": [
+        "代理地址",
+        "地理位置",
+        "响应延迟",
+        "可用状态",
+        "今日使用次数"
+      ],
+      "statuses": [
+        "可用",
+        "不可用",
+        "已禁用"
+      ],
+      "actions": [
+        "检测可用",
+        "禁用节点"
+      ],
+      "action_targets": [
+        "可用",
+        "已禁用"
+      ],
+      "metrics": [
+        "节点总数",
+        "可用节点",
+        "今日分配"
+      ],
+      "desc": "维护代理IP节点的地址、可用性检测和动态分配",
+      "page_shape": "crud-table",
+      "_page_shape_explicit": true
+    },
+    {
+      "key": "format_adapter",
+      "name": "格式适配器",
+      "entity": "格式配置",
+      "fields": [
+        "配置名称",
+        "输入格式",
+        "输出格式",
+        "Schema映射",
+        "校验规则"
+      ],
+      "statuses": [
+        "待验证",
+        "已验证",
+        "已废弃"
+      ],
+      "actions": [
+        "验证格式",
+        "废弃配置"
+      ],
+      "action_targets": [
+        "已验证",
+        "已废弃"
+      ],
+      "metrics": [
+        "配置总数",
+        "已验证配置",
+        "支持格式数"
+      ],
+      "desc": "将采集数据从JSON/XML/CSV等格式转换为统一Schema",
+      "page_shape": "crud-table",
+      "_page_shape_explicit": true
+    },
+    {
+      "key": "extraction_log",
+      "name": "采集执行日志",
+      "entity": "执行日志",
+      "fields": [
+        "执行时间",
+        "关联项目",
+        "状态",
+        "耗时",
+        "出错代码行"
+      ],
+      "statuses": [
+        "成功",
+        "部分成功",
+        "执行失败",
+        "超时"
+      ],
+      "actions": [
+        "查看详情",
+        "重试任务"
+      ],
+      "action_targets": [
+        "执行失败",
+        "执行失败"
+      ],
+      "metrics": [
+        "日志总数",
+        "成功执行",
+        "失败执行"
+      ],
+      "desc": "记录每次采集任务的执行详情、耗时和异常堆栈",
+      "page_shape": "job-timeline",
+      "_page_shape_explicit": true
+    },
+    {
+      "key": "page_change",
+      "name": "页面变更监控",
+      "entity": "变更记录",
+      "fields": [
+        "目标页面",
+        "监测时间",
+        "变更类型",
+        "变更片段",
+        "影响规则"
+      ],
+      "statuses": [
+        "已发现",
+        "已确认",
+        "已忽略",
+        "已修复"
+      ],
+      "actions": [
+        "确认变更",
+        "忽略变更"
+      ],
+      "action_targets": [
+        "已确认",
+        "已忽略"
+      ],
+      "metrics": [
+        "变更总数",
+        "未处理变更",
+        "今日发现"
+      ],
+      "desc": "监测目标网页DOM结构变化并评估对解析规则的影响",
+      "page_shape": "dag-graph",
+      "_page_shape_explicit": true
+    },
+    {
+      "key": "data_sample",
+      "name": "数据采样器",
+      "entity": "采样方案",
+      "fields": [
+        "方案名称",
+        "采样方式",
+        "采样比例",
+        "数据来源",
+        "最近采样时间"
+      ],
+      "statuses": [
+        "待采样",
+        "已完成",
+        "已过期"
+      ],
+      "actions": [
+        "执行采样",
+        "更新方案"
+      ],
+      "action_targets": [
+        "待采样",
+        "待采样"
+      ],
+      "metrics": [
+        "方案总数",
+        "已完成采样",
+        "覆盖来源数"
+      ],
+      "desc": "按随机、分层或系统化策略对采集结果进行采样",
+      "page_shape": "crud-table",
+      "_page_shape_explicit": true
+    },
+    {
+      "key": "export_center",
+      "name": "采集导出中心",
+      "entity": "导出任务",
+      "fields": [
+        "导出范围",
+        "目标格式",
+        "导出时间",
+        "文件大小",
+        "导出状态"
+      ],
+      "statuses": [
+        "排队中",
+        "导出中",
+        "已完成",
+        "导出失败"
+      ],
+      "actions": [
+        "开始导出",
+        "重新导出"
+      ],
+      "action_targets": [
+        "导出中",
+        "导出中"
+      ],
+      "metrics": [
+        "导出任务数",
+        "已完成导出",
+        "失败导出"
+      ],
+      "desc": "将采集结果按条件导出为CSV、JSON、EXCEL等格式并保留来源批次",
+      "page_shape": "crud-table",
+      "_page_shape_explicit": true
+    },
+    {
+      "key": "source_registry",
+      "name": "数据源注册",
+      "entity": "数据源",
+      "fields": [
+        "数据源名称",
+        "源类型",
+        "连接配置",
+        "认证方式",
+        "最近连通时间"
+      ],
+      "statuses": [
+        "待验证",
+        "已连通",
+        "连通失败",
+        "已停用"
+      ],
+      "actions": [
+        "验证连通",
+        "停用源"
+      ],
+      "action_targets": [
+        "待验证",
+        "已停用"
+      ],
+      "metrics": [
+        "数据源总数",
+        "已连通源",
+        "今日采集"
+      ],
+      "desc": "注册和管理网页、API和文件等采集数据源",
+      "page_shape": "crud-table",
+      "_page_shape_explicit": true
+    },
+    {
+      "key": "retry_policy",
+      "name": "采集重试策略",
+      "entity": "重试规则",
+      "fields": [
+        "规则名称",
+        "最大重试次数",
+        "退避间隔",
+        "重试条件",
+        "降级策略"
+      ],
+      "statuses": [
+        "草稿",
+        "已启用",
+        "已停用"
+      ],
+      "actions": [
+        "启用规则",
+        "停用规则"
+      ],
+      "action_targets": [
+        "已启用",
+        "已停用"
+      ],
+      "metrics": [
+        "规则总数",
+        "已启用规则",
+        "今日重试"
+      ],
+      "desc": "定义采集失败后的重试条件、退避间隔和降级兜底策略",
+      "page_shape": "crud-table",
+      "_page_shape_explicit": true
+    }
+  ]
+}
