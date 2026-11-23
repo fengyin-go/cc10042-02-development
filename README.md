@@ -79,5 +79,35 @@ npm run dev
 - 列表接口统一返回 `{ items, total, page, size }`，动作接口统一返回 `{ ok, message }`。
 - 状态流转只允许在 `app/services` 里改，路由层不做业务判断。
 
+## 分区质量核算（数据质量校验的核算结果）
+
+数据质量校验模块的质量规则承载应用表与阈值配置；`app/services/quality_accounting.py`
+在此基础上补齐质量核算结果：从分区接入数据计算有效行比例，出具分区校验结论与入湖回执。
+
+- 接入任务登记同一目标分区的应交文件与本期入湖时间；按（来源文件，行号）接收记录，
+  补传/重试不重复入湖、不重复计入比例。
+- 核算时分子、分母取自同一确认范围，空分区单列；有效行比例达到本期质量阈值即达标。
+- 批量接入凭分区校验结论确认可入湖分区；入湖回执关联可复算的有效行比例、隔离明细
+  与核算口径，下游当班人员据此判断此刻可领取范围、提交失败行补件。
+- 核算结果回写质量规则的「最近校验结果」。
+
+专用接口（`app/routers/quality_accounting.py`，前缀 `/api/quality-accounting`）：
+
+| 方法与路径 | 说明 |
+| --- | --- |
+| `POST /tasks` | 登记接入任务（应交文件、目标分区、本期入湖时间） |
+| `POST /tasks/{id}/files` | 接收文件行明细（补传/重试幂等） |
+| `POST /tasks/{id}/accounting` | 发起核算（到时/补交/重试），出具入湖回执 |
+| `GET /tasks/{id}/receipt` | 打开入湖回执（默认最新，可按回执号取历史） |
+| `GET /tasks/{id}/receipts` | 回执历史（每次核算一份） |
+| `GET /tasks/{id}/availability` | 下游此刻可领取范围与迟到影响 |
+| `GET /tasks/{id}/files` | 应交/已收文件及其首次计入的核算批次 |
+
+场景演示（阈值 80%、两份应交文件、第二份迟到拉低比例、重传幂等）：
+
+```bash
+cd backend && python3 scripts/demo_quality_accounting.py
+```
+
 领域：数据工程
 子方向：数据采集、爬虫与RPA
